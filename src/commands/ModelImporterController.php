@@ -37,11 +37,10 @@ class ModelImporterController extends Controller
      *
      * @param string $filePath Path to .xml file
      * @param string $modelClass Name of the class in which the XML will be converted to
-     * @param string $nodeName Name of enclosing node
      *
      * @throws \yii\base\InvalidParamException
      */
-    public function actionXml($filePath, $modelClass,$nodeName = 'item')
+    public function actionXml($filePath, $modelClass)
     {
         // check if model exists
         if (!class_exists($modelClass)) {
@@ -117,6 +116,85 @@ class ModelImporterController extends Controller
             }
         }
 
+
+        $this->stdout(PHP_EOL . "Saved {$itemCounter} item" . ($itemCounter !== 1 ? 's' : null) . PHP_EOL,Console::FG_GREEN);
+    }
+
+
+    /**
+     *  Import JSON Files
+     *
+     * Hint:
+     *  - Escape backslashes in modelClass attribute
+     *  - Use --interactive set to 0 to run command without a break
+     *
+     * @param string $filePath Path to .xml file
+     * @param string $modelClass Name of the class in which the XML will be converted to
+     *
+     * @throws \yii\base\InvalidParamException
+     */
+    public function actionJson($filePath,$modelClass) {
+
+        // check if model exists
+        if (!class_exists($modelClass)) {
+            $this->stderr("Class '{$modelClass}' does not exist" . PHP_EOL, Console::FG_RED);
+            exit;
+        }
+
+        // get alias if alias is used
+        $filePath = \Yii::getAlias($filePath, false);
+
+        // check if file exists
+        if (!is_file($filePath)) {
+            $this->stderr('File does not exist' . PHP_EOL, Console::FG_RED);
+            exit;
+        }
+
+        // check return value
+        $itemCollection = json_decode(file_get_contents($filePath));
+
+        // check file has valid json in it
+        if ($itemCollection === null) {
+            $this->stderr('Content is not valid JSON' . PHP_EOL, Console::FG_RED);
+            exit;
+        }
+
+        // set item counter
+        $itemCounter = 0;
+        foreach ((array)$itemCollection as $item) {
+            // increase counter here for output
+            $itemCounter++;
+            /** @var ActiveRecord $model */
+            $model = new $modelClass();
+
+            foreach ((array)$item as $attributeName => $attributeValue) {
+                if($model->hasProperty($attributeName) && $model->canSetProperty($attributeName)){
+                    $model->$attributeName = $attributeValue;
+                } else {
+                    $this->stdout("Can not set attribute '{$attributeName}' for item {$itemCounter}" . PHP_EOL, Console::FG_BLUE);
+                }
+            }
+
+            // check if model is saved
+            if (!$model->save()) {
+
+                $this->stderr("Item {$itemCounter} can not be saved" . PHP_EOL, Console::FG_RED);
+
+                foreach ($model->getErrors() as $attribute => $errorMessages) {
+                    $this->stderr($attribute . ':' . PHP_EOL, Console::FG_RED);
+                    foreach ((array)$errorMessages as $errorMessage) {
+                        $this->stderr(' - ' . $errorMessage . PHP_EOL, Console::FG_RED);
+                    }
+                }
+
+                if (!$this->confirm('Continue import?', true)) {
+                    $this->stderr(PHP_EOL . 'Stopped import' . PHP_EOL, Console::FG_RED);
+                    exit;
+                }
+                // decrease for correct output if import failed
+                $itemCounter--;
+            }
+        }
 
         $this->stdout(PHP_EOL . "Saved {$itemCounter} item" . ($itemCounter !== 1 ? 's' : null) . PHP_EOL,Console::FG_GREEN);
     }
