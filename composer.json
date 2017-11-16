@@ -1,0 +1,20 @@
+{
+    "name": "dmstr/yii2-model-importer",
+    "description": "Yii2 Model Importer",
+    "type": "yii2-extention",
+    "require": {
+        "yiisoft/yii2": "2.*",
+        "dmstr/yii2-web": "*"
+    },
+    "authors": [
+        {
+            "name": "Elias Luhr",
+            "email": "e.luhr@herzogkommunikation.de"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "dmstr\\importer": "src"
+        }
+    }
+}
