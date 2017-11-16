@@ -26,7 +26,7 @@ composer require dmstr/yii2-model-importer
 <?php
     ...
     'controllerMap' => [
-            'sitefusion' => dmstr\commands\ModelImporterController::class
+            'model-importer' => dmstr\commands\ModelImporterController::class
     ]
     ...
 ```
