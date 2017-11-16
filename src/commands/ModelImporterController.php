@@ -20,16 +20,20 @@ use yii\helpers\Console;
  * @package dmstr\importer
  * @author Elias Luhr <e.luhr@herzogkommunikation.de>
  */
-class ImportController extends Controller
+class ModelImporterController extends Controller
 {
+
+    /**
+     * @var string Name of enclosing node
+     */
+    public $nodeName = 'item';
+
     /**
      *  Import XML Files
      *
      * Hint:
      *  - Escape backslashes in modelClass attribute
      *  - Use --interactive set to 0 to run command without a break
-     *
-     *
      *
      * @param string $filePath Path to .xml file
      * @param string $modelClass Name of the class in which the XML will be converted to
@@ -64,11 +68,11 @@ class ImportController extends Controller
             exit;
         }
 
-        $xmlObjects = $xmlObjects->xpath('//' . $nodeName);
+        $xmlObjects = $xmlObjects->xpath('//' . $this->nodeName);
 
         // check xml has nodes named like defined variable
         if (empty($xmlObjects)) {
-            $this->stderr("Node '{$nodeName}' not found" . PHP_EOL, Console::FG_RED);
+            $this->stderr("Node '{$this->nodeName}' not found" . PHP_EOL, Console::FG_RED);
             exit;
         }
 
