@@ -128,7 +128,7 @@ class ModelImporterController extends Controller
      *  - Escape backslashes in modelClass attribute
      *  - Use --interactive set to 0 to run command without a break
      *
-     * @param string $filePath Path to .xml file
+     * @param string $filePath Path to .json file
      * @param string $modelClass Name of the class in which the XML will be converted to
      *
      * @throws \yii\base\InvalidParamException
